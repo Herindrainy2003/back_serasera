@@ -82,15 +82,15 @@ app.get('/tasks', async (req, res) => {
     let query;
     let result;
 
-    if (category) {
+    if (!category) {
+      // Si aucun ID de catégorie n'est fourni, récupérer toutes les tâches
+      query = 'SELECT tasks.*, categories.name AS category_name FROM tasks INNER JOIN categories ON tasks.categories = categories.id;';
+      result = await pool.query(query);
+    } else {
       // Si l'ID de catégorie est fourni, récupérer les tâches filtrées
       query = 'SELECT tasks.*, categories.name AS category_name FROM tasks INNER JOIN categories ON tasks.categories = categories.id WHERE tasks.categories = $1;';
       const values = [category];
       result = await pool.query(query, values);
-    } else {
-      // Sinon, récupérer toutes les tâches sans filtre
-      query = 'SELECT tasks.*, categories.name AS category_name FROM tasks INNER JOIN categories ON tasks.categories = categories.id;';
-      result = await pool.query(query);
     }
 
     res.json(result.rows);
